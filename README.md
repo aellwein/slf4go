@@ -1,3 +1,7 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/aellwein/slf4go)](https://goreportcard.com/report/github.com/aellwein/slf4go)
+[![Coverage Status](https://img.shields.io/coveralls/github/aellwein/slf4go/master.svg)](https://coveralls.io/github/aellwein/slf4go?branch=master)
+[![Build Status](https://img.shields.io/travis/aellwein/slf4go/master.svg)](https://travis-ci.org/aellwein/slf4go) 
+
 # SLF4GO
 Simple Logging Facade for [Golang](https://www.golang.org), inspired by [SLF4J](https://www.slf4j.org).
 
