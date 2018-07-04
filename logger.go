@@ -1,68 +1,51 @@
 package slf4go
 
-type LEVEL int
+type LogLevel int
 
+// log levels defined by slf4go
 const (
-    LEVEL_TRACE LEVEL = iota
-    LEVEL_DEBUG
-    LEVEL_INFO
-    LEVEL_WARN
-    LEVEL_ERROR
-    LEVEL_FATAL
-    LEVEL_PANIC
+	LEVEL_TRACE LogLevel = iota
+	LEVEL_DEBUG
+	LEVEL_INFO
+	LEVEL_WARN
+	LEVEL_ERROR
+	LEVEL_FATAL
+	LEVEL_PANIC
 )
 
 // Logger interface
 type Logger interface {
-    // Get the name of l, which was used for `GetLogger`
-    GetName() string
-    // Setup l's level.
-    SetLevel(l LEVEL)
-    
-    IsEnableTrace() bool
-    
-    IsEnableDebug() bool
-    
-    IsEnableInfo() bool
-    
-    IsEnableWarn() bool
-    
-    IsEnableError() bool
-    
-    IsEnableFatal() bool
+	// Get the name of l, which was used for `GetLogger`
+	GetName() string
 
-    IsEnablePanic() bool
-    
-    Trace(args ...interface{})
-    
-    TraceF(format string, args ...interface{})
-    
-    Debug(args ...interface{})
-    
-    DebugF(format string, args ...interface{})
-    
-    Info(args ...interface{})
-    
-    InfoF(format string, args ...interface{})
-    
-    Warn(args ...interface{})
-    
-    WarnF(format string, args ...interface{})
-    
-    Error(args ...interface{})
-    
-    ErrorF(format string, args ...interface{})
-    
-    Fatal(args ...interface{})
-    
-    FatalF(format string, args ...interface{})
+	// Setup l's level.
+	SetLevel(l LogLevel)
 
-    Panic(args ...interface{})
+	IsTraceEnabled() bool
+	IsDebugEnabled() bool
+	IsInfoEnabled() bool
+	IsWarnEnabled() bool
+	IsErrorEnabled() bool
+	IsFatalEnabled() bool
+	IsPanicEnabled() bool
 
-    PanicF(format string, args ...interface{})
+	Trace(args ...interface{})
+	Tracef(format string, args ...interface{})
+	Debug(args ...interface{})
+	Debugf(format string, args ...interface{})
+	Info(args ...interface{})
+	Infof(format string, args ...interface{})
+	Warn(args ...interface{})
+	Warnf(format string, args ...interface{})
+	Error(args ...interface{})
+	Errorf(format string, args ...interface{})
+	Fatal(args ...interface{})
+	Fatalf(format string, args ...interface{})
+	Panic(args ...interface{})
+	Panicf(format string, args ...interface{})
 }
 
-// log FACTORY interface
+// factory interface, which can be implemented by an adaptor.
 type LoggerFactory interface {
-    GetLogger(name string) Logger
+	GetLogger(name string) Logger
 }
