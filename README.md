@@ -1,108 +1,100 @@
 # SLF4GO
-Simple Logger Facade for Golang, inspired by SLF4J
+Simple Logging Facade for [Golang](https://www.golang.org), inspired by [SLF4J](https://www.slf4j.org).
 
 # What is SLF4GO
 
-SLF4GO is not a logger framework like logrus, it doesn't have better logger implement. 
+SLF4J provides an abstraction over a particular logging framework used under the hood.
 
-But SLF4GO could be used for separating your business code from logger framework.
+# How SLF4GO works
 
-# How SLF4GO does
+SLF4GO is actually a facade, the actual implementation of logging is hidden in and imported with 
+SLF4GO adaptor code (see below for list of existing adaptors).
 
-SLF4GO provides two interface, named `Logger` and `LoggerFactory`.
+SLF4GO itself provides two interfaces, `LoggerFactory` and `Logger`.
 
-`LoggerFactory` used for adapting your logger framework.
+`LoggerFactory` is adaptor-specific and is mostly the glue code to the underlying
+logger implementation.
 
-`Logger` used as log operation standard API, like `Trace`, `Debug`, `Info`, `Warn`, `Error`, 
-all log methods of your logger framework need be wrapped by `Logger`.
-
-SLF4GO support logrus/log by default, you can use them directly.
-
-After above steps, 
-You can customize any logger framework as your what, 
-and then you need adapt it as a `LoggerFactory`, make it as the global LoggerFactory by `slf4go.SetLoggerFactory`.
+`Logger` provides the user-facing API, like `Trace`, `Debug`, `Info`, `Warn`, 
+`Error`, `Fatal` and `Panic`.
 
 # Usage
 
-If you use native log or logrus, the code below shows you how it works.
+There are already some existing adaptors:
+* [github.com/aellwein/slf4go-native-adaptor](https://github.com/aellwein/slf4go-native-adaptor) - logging implementation 
+based upon standard Golang "log" package.
+* [github.com/aellwein/slf4go-logrus-adaptor](https://github.com/aellwein/slf4go-logrus-adaptor) - an adaptor for 
+[logrus](https://github.com/sirupsen/logrus) logging framework.
 
-If you use other logger frameworks, you need implement `LoggerFactory` by yourself.
 
-## Install
+Now, in order to start using SLF4GO, you just need to do the following:
+```sh
+go get -u github.com/aellwein/slf4go
 
-```bash
-go get github.com/sisyphsu/slf4go
+# now you need to get a particular adaptor, e.g. logrus:
+go get -u github.com/aellwein/slf4go-logrus-adaptor
+
+# or, for the native golang logging adaptor:
+go get -u github.com/aellwein/slf4go-native-adaptor
+
 ```
+The basic usage is always the same, you just need to import the correct
+adaptor package you want to use with your application.
 
-## Use native log as logger
+## Using native adaptor 
 
 ```go
 package main
 
 import (
-    "github.com/sisyphsu/slf4go"
-    "github.com/sisyphsu/slf4go/example/modules"
+    "github.com/aellwein/slf4go"
+    _ "github.com/aellwein/slf4go-native-adaptor"
 )
 
-// doesn't need initialize
-
-// use slf4j everywhere
 func main() {
     logger := slf4go.GetLogger("main")
-    logger.DebugF("I want %s", "Cycle Import")
-    logger.ErrorF("please support it, in %02d second!", 1)
-    modules.Login()
-}
-
-// just use slf4go everywhere, doesn't care aboud the implement.
-func Login() {
-    logger := slf4go.GetLogger("login")
-    logger.Info("do login")
-    logger.ErrorF("login result %s", "failed")
+    
+    // our level is debug -> traces are hidden
+    logger.SetLevel(slf4go.LevelDebug)
+    
+    logger.Debug("here goes some debug information")
+    logger.Trace("this will not appear.")
+    logger.Infof("Here is an extended form, logger '%s' with param %d.", logger.GetName(), 42)
+    logger.Error("Some error occurred.")
+    logger.Panic("This would print stack trace and cause panic.")
+    logger.Fatal("This line would be logged and the program will terminate.")
 }
 ```
 
-## Use logrus as logger
+## Use logrus adaptor
 
-
+The same as above, only another adaptor is imported.
 ```go
 package main
 
 import (
-    log "github.com/Sirupsen/logrus"
-    "os"
-    "github.com/sisyphsu/slf4go"
-    "github.com/sisyphsu/slf4go/adapter/logrus"
+    "github.com/aellwein/slf4go"
+    _ "github.com/aellwein/slf4go-logrus-adaptor"
 )
 
-// initialize logger, just like `log4j.properties` or `logback.xml`
-func init() {
-    // Log as JSON instead of the default ASCII formatter.
-    log.SetFormatter(&log.JSONFormatter{})
-    // Output to stdout instead of the default stderr, could also be a file.
-    log.SetOutput(os.Stdout)
-    // Only log the warning severity or above.
-    log.SetLevel(log.WarnLevel)
-    logger := log.New()
-    // customize your root logger
-    slf4go.SetLoggerFactory(logrus.NewLoggerFactory(logger))
-}
-
-// use slf4go everywhere
 func main() {
     logger := slf4go.GetLogger("main")
-    logger.DebugF("I want %s", "Cycle Import")
-    logger.ErrorF("please support it, in %02d second!", 1)
+    
+    // our level is debug -> traces are hidden
+    logger.SetLevel(slf4go.LevelDebug)
+    
+    logger.Debug("here goes some debug information")
+    logger.Trace("this will not appear.")
+    logger.Infof("Here is an extended form, logger '%s' with param %d.", logger.GetName(), 42)
+    logger.Error("Some error occurred.")
+    logger.Panic("This would print stack trace and cause panic.")
+    logger.Fatal("This line would be logged and the program will terminate.")
 }
 ```
 
 # Benefit
 
-As we can see, golang changes very quickly, and the logger-tech isn't very mature.
-
-Separate the logger implement from modules maybe a good idea.
-
-if oneday you need to use `logxxx` replace `logrus`, 
-do you want to change all code contains `log.info(...)`?
-   
-or only change `logger_init.go`?
+Separation of logging interface from its implementation is may be a good idea.
+One day you will be able to change the underlying logging framework with another
+one, just by changing the adaptor implementation (i.e. only changing the 
+import statement).
