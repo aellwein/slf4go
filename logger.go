@@ -31,7 +31,7 @@ type Logger interface {
 	// Get the name of l, which was used for `GetLogger`
 	GetName() string
 
-	// Setup l's level.
+	// Setup log level
 	SetLevel(l LogLevel)
 
 	IsTraceEnabled() bool
