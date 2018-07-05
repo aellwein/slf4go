@@ -96,6 +96,40 @@ func main() {
 }
 ```
 
+## Pass adaptor-specific parameters
+
+To make the most of used logging framework, it's sometimes necessary to use its special features.
+For this case, ``LoggingFactory.SetLoggingParameters()`` function can be called once before Logger
+initialization, to pass a map of parameters to the logger adaptor.
+
+Please note, that ``SetLoggingParameters()`` is **not threadsafe**, so you should called only once
+**before** creating any ``Logger`` instance!
+
+#### Example:
+
+```go
+package main
+
+import (
+	"github.com/aellwein/slf4go"
+	_ "github.com/aellwein/slf4go-logrus-adaptor"
+)
+
+func main() {
+	params := slf4go.LoggingParameters{
+		"foo": 42,
+		"bar": 1337,
+		"baz": 0xDEADBEEF,
+	}
+	err := slf4go.GetLoggerFactory().SetLoggingParameters(params)
+	if err != nil {
+		panic(err)
+	}
+}
+
+```
+
+
 # Benefit
 
 Separation of logging interface from its implementation is may be a good idea.

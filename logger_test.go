@@ -3,6 +3,7 @@ package slf4go
 import (
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+	"errors"
 )
 
 func TestPanicIsCausedWhenCallingGetLoggerWithoutSetLoggerFactory(t *testing.T) {
@@ -91,6 +92,13 @@ func (m *mockLoggerFactory) GetLogger(name string) Logger {
 	l.SetName(name)
 	l.SetLevel(LevelDebug)
 	return l
+}
+
+func (m *mockLoggerFactory) SetLoggingParameters(params LoggingParameters) error {
+	if _, ok := params["test"]; ok {
+		return errors.New("provoked error")
+	}
+	return nil
 }
 
 func TestLoggerAdaptor_TRACE(t *testing.T) {
@@ -334,6 +342,52 @@ func TestLoggerAdaptor_PANIC(t *testing.T) {
 			})
 			Convey("Then IsPanicEnabled() must be 'true'", func() {
 				So(logger.IsPanicEnabled(), ShouldBeTrue)
+			})
+		})
+	})
+}
+
+func TestLoggerAdaptor_GetName(t *testing.T) {
+	Convey("Given a new logger factory", t, func() {
+		factory := new(mockLoggerFactory)
+		SetLoggerFactory(factory)
+
+		Convey("When a new named logger 'test' is created", func() {
+			logger := GetLogger("test")
+
+			Convey("Then GetName() returns 'test'", func() {
+				So(logger.GetName(), ShouldEqual, "test")
+			})
+		})
+	})
+}
+
+func TestLoggerAdaptor_GetLevel(t *testing.T) {
+	Convey("Given a new logger factory", t, func() {
+		factory := new(mockLoggerFactory)
+		SetLoggerFactory(factory)
+
+		Convey("When a new named logger with level 'Info' is created", func() {
+			logger := GetLogger("test")
+			logger.SetLevel(LevelInfo)
+
+			Convey("Then GetLevel() returns 'Info'", func() {
+				So(logger.GetLevel(), ShouldEqual, LevelInfo)
+			})
+		})
+	})
+}
+
+func TestLoggerFactory_SetLoggingParameters(t *testing.T) {
+	Convey("Given a new logger factory", t, func() {
+		factory := new(mockLoggerFactory)
+		SetLoggerFactory(factory)
+
+		Convey("When SetLoggingParameters() with 'test' parameter is called", func() {
+			err := GetLoggerFactory().SetLoggingParameters(LoggingParameters{"test": "bla"})
+
+			Convey("Then an error is returned", func() {
+				So(err.Error(), ShouldEqual, "provoked error")
 			})
 		})
 	})
