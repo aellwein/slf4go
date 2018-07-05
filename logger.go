@@ -28,11 +28,14 @@ var (
 
 // Logger interface
 type Logger interface {
-	// Get the name of l, which was used for `GetLogger`
+	// Get the name of this logger.
 	GetName() string
 
 	// Setup log level
 	SetLevel(l LogLevel)
+
+	// Get log level
+	GetLevel() LogLevel
 
 	IsTraceEnabled() bool
 	IsDebugEnabled() bool
@@ -58,9 +61,17 @@ type Logger interface {
 	Panicf(format string, args ...interface{})
 }
 
+type LoggingParameters map[string]interface{}
+
 // factory interface, which can be implemented by an adaptor.
 type LoggerFactory interface {
+	// This method is called in order to get a logger instance.
 	GetLogger(name string) Logger
+
+	// A set of arbitrary parameters can be passed to underlying logger adaptor.
+	// It's up to a logger adaptor implementation to validate the parameters and return appropriate error,
+	// or nil, if no error was occurred.
+	SetLoggingParameters(params LoggingParameters) error
 }
 
 type LoggerAdaptor struct {
@@ -126,4 +137,9 @@ func GetLogger(name string) Logger {
 		panic("LoggerFactory was not set! Please ensure you use SetLoggerFactory() before you get a logger instance")
 	}
 	return theLoggerFactory.GetLogger(name)
+}
+
+// get logger factory
+func GetLoggerFactory() LoggerFactory {
+	return theLoggerFactory
 }
