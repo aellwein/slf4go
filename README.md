@@ -29,6 +29,9 @@ There are already some existing adaptors:
 based upon standard Golang "log" package.
 * [github.com/aellwein/slf4go-logrus-adaptor](https://github.com/aellwein/slf4go-logrus-adaptor) - an adaptor for 
 [logrus](https://github.com/sirupsen/logrus) logging framework.
+* [github.com/aellwein/slf4go-zap-adaptor](https://github.com/aellwein/slf4go-zap-adaptor) - an adaptor for 
+[zap](https://github.com/uber-gp/zap) logging framework.
+
 
 
 Now, in order to start using SLF4GO, you just need to do the following:
@@ -95,6 +98,8 @@ func main() {
     logger.Fatal("This line would be logged and the program will terminate.")
 }
 ```
+You get the idea.
+
 
 ## Pass adaptor-specific parameters
 
