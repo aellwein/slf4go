@@ -4,6 +4,8 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 	"errors"
+	"fmt"
+	"github.com/smartystreets/assertions"
 )
 
 func TestPanicIsCausedWhenCallingGetLoggerWithoutSetLoggerFactory(t *testing.T) {
@@ -39,7 +41,9 @@ func TestSetLoggerFactoryDoesNotAcceptNilArgument(t *testing.T) {
 // now test some log adapter functionality by using a mock.
 // we implement only what we need to fulfill the interfaces.
 
-type mockLoggerFactory struct{}
+type mockLoggerFactory struct {
+	defaultLogLevel LogLevel
+}
 
 type mockLogger struct {
 	LoggerAdaptor
@@ -94,6 +98,10 @@ func (m *mockLoggerFactory) GetLogger(name string) Logger {
 	return l
 }
 
+func (m *mockLoggerFactory) SetDefaultLogLevel(level LogLevel) {
+	m.defaultLogLevel = level
+}
+
 func (m *mockLoggerFactory) SetLoggingParameters(params LoggingParameters) error {
 	if _, ok := params["test"]; ok {
 		return errors.New("provoked error")
@@ -101,249 +109,71 @@ func (m *mockLoggerFactory) SetLoggingParameters(params LoggingParameters) error
 	return nil
 }
 
-func TestLoggerAdaptor_TRACE(t *testing.T) {
-	Convey("Given a new logger factory", t, func() {
-
-		factory := new(mockLoggerFactory)
-		SetLoggerFactory(factory)
-
-		Convey("When logger with level TRACE is created", func() {
-
-			logger := GetLogger("test")
-			logger.SetLevel(LevelTrace)
-
-			Convey("Then IsTraceEnabled() must be 'true'", func() {
-				So(logger.IsTraceEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsDebugEnabled() must be 'true'", func() {
-				So(logger.IsDebugEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsInfoEnabled() must be 'true'", func() {
-				So(logger.IsInfoEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsWarnEnabled() must be 'true'", func() {
-				So(logger.IsWarnEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsErrorEnabled() must be 'true'", func() {
-				So(logger.IsErrorEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsFatalEnabled() must be 'true'", func() {
-				So(logger.IsFatalEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsPanicEnabled() must be 'true'", func() {
-				So(logger.IsPanicEnabled(), ShouldBeTrue)
-			})
-		})
-	})
+func newMockLoggerFactory() mockLoggerFactory {
+	m := mockLoggerFactory{}
+	m.SetDefaultLogLevel(LevelTrace)
+	return m
 }
-func TestLoggerAdaptor_DEBUG(t *testing.T) {
-	Convey("Given a new logger factory", t, func() {
 
-		factory := new(mockLoggerFactory)
-		SetLoggerFactory(factory)
-
-		Convey("When logger with level DEBUG is created", func() {
-
-			logger := GetLogger("test")
-			logger.SetLevel(LevelDebug)
-
-			Convey("Then IsTraceEnabled() must be 'false'", func() {
-				So(logger.IsTraceEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsDebugEnabled() must be 'true'", func() {
-				So(logger.IsDebugEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsInfoEnabled() must be 'true'", func() {
-				So(logger.IsInfoEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsWarnEnabled() must be 'true'", func() {
-				So(logger.IsWarnEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsErrorEnabled() must be 'true'", func() {
-				So(logger.IsErrorEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsFatalEnabled() must be 'true'", func() {
-				So(logger.IsFatalEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsPanicEnabled() must be 'true'", func() {
-				So(logger.IsPanicEnabled(), ShouldBeTrue)
-			})
-		})
-	})
+type level struct {
+	checkFunc func() bool
+	funcName  string
 }
-func TestLoggerAdaptor_INFO(t *testing.T) {
+
+func TestLoggerAdaptor_AllLevels(t *testing.T) {
 	Convey("Given a new logger factory", t, func() {
 
-		factory := new(mockLoggerFactory)
-		SetLoggerFactory(factory)
+		factory := newMockLoggerFactory()
+		SetLoggerFactory(&factory)
 
-		Convey("When logger with level INFO is created", func() {
+		for _, lvl := range AllLevels {
+			Convey(fmt.Sprintf("When logger with level %v is created", lvl), func() {
 
-			logger := GetLogger("test")
-			logger.SetLevel(LevelInfo)
+				logger := GetLogger("test")
+				logger.SetLevel(lvl)
+				l := map[LogLevel]level{
+					LevelTrace: {
+						checkFunc: logger.IsTraceEnabled,
+						funcName:  "IsTraceEnabled",
+					},
+					LevelDebug: {
+						checkFunc: logger.IsDebugEnabled,
+						funcName:  "IsDebugEnabled",
+					},
+					LevelInfo: {
+						checkFunc: logger.IsInfoEnabled,
+						funcName:  "IsInfoEnabled",
+					},
+					LevelWarn: {
+						checkFunc: logger.IsWarnEnabled,
+						funcName:  "IsWarnEnabled",
+					},
+					LevelError: {
+						checkFunc: logger.IsErrorEnabled,
+						funcName:  "IsErrorEnabled",
+					},
+					LevelFatal: {
+						checkFunc: logger.IsFatalEnabled,
+						funcName:  "IsFatalEnabled",
+					},
+					LevelPanic: {
+						checkFunc: logger.IsPanicEnabled,
+						funcName:  "IsPanicEnabled",
+					},
+				}
 
-			Convey("Then IsTraceEnabled() must be 'false'", func() {
-				So(logger.IsTraceEnabled(), ShouldBeFalse)
+				for k, v := range l {
+					var mustBe = k >= lvl
+					Convey(fmt.Sprintf("Then %s() must be '%v'", v.funcName, mustBe), func() {
+						if mustBe {
+							So(v.checkFunc(), ShouldBeTrue)
+						} else {
+							So(v.checkFunc(), ShouldBeFalse)
+						}
+					})
+				}
 			})
-			Convey("Then IsDebugEnabled() must be 'false'", func() {
-				So(logger.IsDebugEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsInfoEnabled() must be 'true'", func() {
-				So(logger.IsInfoEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsWarnEnabled() must be 'true'", func() {
-				So(logger.IsWarnEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsErrorEnabled() must be 'true'", func() {
-				So(logger.IsErrorEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsFatalEnabled() must be 'true'", func() {
-				So(logger.IsFatalEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsPanicEnabled() must be 'true'", func() {
-				So(logger.IsPanicEnabled(), ShouldBeTrue)
-			})
-		})
-	})
-}
-func TestLoggerAdaptor_WARN(t *testing.T) {
-	Convey("Given a new logger factory", t, func() {
-
-		factory := new(mockLoggerFactory)
-		SetLoggerFactory(factory)
-
-		Convey("When logger with level WARN is created", func() {
-
-			logger := GetLogger("test")
-			logger.SetLevel(LevelWarn)
-
-			Convey("Then IsTraceEnabled() must be 'false'", func() {
-				So(logger.IsTraceEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsDebugEnabled() must be 'false'", func() {
-				So(logger.IsDebugEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsInfoEnabled() must be 'false'", func() {
-				So(logger.IsInfoEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsWarnEnabled() must be 'true'", func() {
-				So(logger.IsWarnEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsErrorEnabled() must be 'true'", func() {
-				So(logger.IsErrorEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsFatalEnabled() must be 'true'", func() {
-				So(logger.IsFatalEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsPanicEnabled() must be 'true'", func() {
-				So(logger.IsPanicEnabled(), ShouldBeTrue)
-			})
-		})
-	})
-}
-func TestLoggerAdaptor_ERROR(t *testing.T) {
-	Convey("Given a new logger factory", t, func() {
-
-		factory := new(mockLoggerFactory)
-		SetLoggerFactory(factory)
-
-		Convey("When logger with level ERROR is created", func() {
-
-			logger := GetLogger("test")
-			logger.SetLevel(LevelError)
-
-			Convey("Then IsTraceEnabled() must be 'false'", func() {
-				So(logger.IsTraceEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsDebugEnabled() must be 'false'", func() {
-				So(logger.IsDebugEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsInfoEnabled() must be 'false'", func() {
-				So(logger.IsInfoEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsWarnEnabled() must be 'false'", func() {
-				So(logger.IsWarnEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsErrorEnabled() must be 'true'", func() {
-				So(logger.IsErrorEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsFatalEnabled() must be 'true'", func() {
-				So(logger.IsFatalEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsPanicEnabled() must be 'true'", func() {
-				So(logger.IsPanicEnabled(), ShouldBeTrue)
-			})
-		})
-	})
-}
-func TestLoggerAdaptor_FATAL(t *testing.T) {
-	Convey("Given a new logger factory", t, func() {
-
-		factory := new(mockLoggerFactory)
-		SetLoggerFactory(factory)
-
-		Convey("When logger with level FATAL is created", func() {
-
-			logger := GetLogger("test")
-			logger.SetLevel(LevelFatal)
-
-			Convey("Then IsTraceEnabled() must be 'false'", func() {
-				So(logger.IsTraceEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsDebugEnabled() must be 'false'", func() {
-				So(logger.IsDebugEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsInfoEnabled() must be 'false'", func() {
-				So(logger.IsInfoEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsWarnEnabled() must be 'false'", func() {
-				So(logger.IsWarnEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsErrorEnabled() must be 'false'", func() {
-				So(logger.IsErrorEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsFatalEnabled() must be 'true'", func() {
-				So(logger.IsFatalEnabled(), ShouldBeTrue)
-			})
-			Convey("Then IsPanicEnabled() must be 'true'", func() {
-				So(logger.IsPanicEnabled(), ShouldBeTrue)
-			})
-		})
-	})
-}
-func TestLoggerAdaptor_PANIC(t *testing.T) {
-	Convey("Given a new logger factory", t, func() {
-
-		factory := new(mockLoggerFactory)
-		SetLoggerFactory(factory)
-
-		Convey("When logger with level PANIC is created", func() {
-
-			logger := GetLogger("test")
-			logger.SetLevel(LevelPanic)
-
-			Convey("Then IsTraceEnabled() must be 'false'", func() {
-				So(logger.IsTraceEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsDebugEnabled() must be 'false'", func() {
-				So(logger.IsDebugEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsInfoEnabled() must be 'false'", func() {
-				So(logger.IsInfoEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsWarnEnabled() must be 'false'", func() {
-				So(logger.IsWarnEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsErrorEnabled() must be 'false'", func() {
-				So(logger.IsErrorEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsFatalEnabled() must be 'false'", func() {
-				So(logger.IsFatalEnabled(), ShouldBeFalse)
-			})
-			Convey("Then IsPanicEnabled() must be 'true'", func() {
-				So(logger.IsPanicEnabled(), ShouldBeTrue)
-			})
-		})
+		}
 	})
 }
 
@@ -391,4 +221,8 @@ func TestLoggerFactory_SetLoggingParameters(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestUnknownLogLevel_String_ShouldPanic(t *testing.T) {
+	assertions.ShouldPanic(func() { LogLevel(42).String() })
 }
