@@ -1,11 +1,11 @@
 package slf4go
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
-	"testing"
 	"errors"
 	"fmt"
 	"github.com/smartystreets/assertions"
+	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestPanicIsCausedWhenCallingGetLoggerWithoutSetLoggerFactory(t *testing.T) {
@@ -224,5 +224,5 @@ func TestLoggerFactory_SetLoggingParameters(t *testing.T) {
 }
 
 func TestUnknownLogLevel_String_ShouldPanic(t *testing.T) {
-	assertions.ShouldPanic(func() { LogLevel(42).String() })
+	assertions.ShouldPanic(func() { fmt.Print(LogLevel(42).String()) })
 }
