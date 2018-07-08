@@ -30,7 +30,7 @@ based upon standard Golang "log" package.
 * [github.com/aellwein/slf4go-logrus-adaptor](https://github.com/aellwein/slf4go-logrus-adaptor) - an adaptor for 
 [logrus](https://github.com/sirupsen/logrus) logging framework.
 * [github.com/aellwein/slf4go-zap-adaptor](https://github.com/aellwein/slf4go-zap-adaptor) - an adaptor for 
-[zap](https://github.com/uber-gp/zap) logging framework.
+[zap](https://github.com/uber-go/zap) logging framework.
 
 
 
