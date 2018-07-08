@@ -41,33 +41,74 @@ type Logger interface {
 	// Get log level
 	GetLevel() LogLevel
 
+	// IsTraceEnabled returns true, if level TRACE is enabled.
 	IsTraceEnabled() bool
+
+	// IsDebugEnabled returns true, if level DEBUG is enabled.
 	IsDebugEnabled() bool
+
+	// IsInfoEnabled returns true, if level INFO is enabled.
 	IsInfoEnabled() bool
+
+	// IsWarnEnabled returns true, if level WARN is enabled.
 	IsWarnEnabled() bool
+
+	// IsErrorEnabled returns true, if level ERROR is enabled.
 	IsErrorEnabled() bool
+
+	// IsFatalEnabled returns true, if level FATAL is enabled.
 	IsFatalEnabled() bool
+
+	// IsPanicEnabled returns true, if level PANIC is enabled.
 	IsPanicEnabled() bool
 
+	// Trace logs a message on log level TRACE
 	Trace(args ...interface{})
+
+	// Tracef logs a formatted message on log level TRACE
 	Tracef(format string, args ...interface{})
+
+	// Debug logs a message on log level DEBUG
 	Debug(args ...interface{})
+
+	// Tracef logs a formatted message on log level TRACE
 	Debugf(format string, args ...interface{})
+
+	// Info logs a message on log level INFO
 	Info(args ...interface{})
+
+	// Infof logs a formatted message on log level INFO
 	Infof(format string, args ...interface{})
+
+	// Warn logs a message on log level WARN
 	Warn(args ...interface{})
+
+	// Warnf logs a formatted message on log level WARN
 	Warnf(format string, args ...interface{})
+
+	// Error logs a message on log level ERROR
 	Error(args ...interface{})
+
+	// Errorf logs a formatted message on log level ERROR
 	Errorf(format string, args ...interface{})
+
+	// Fatal logs a message on log level FATAL. Program exits afterwards, no defer functions are called.
 	Fatal(args ...interface{})
+
+	// Fatalf logs a formatted message on log level FATAL. Program exits afterwards, no defer functions are called.
 	Fatalf(format string, args ...interface{})
+
+	// Panic logs a message on log level PANIC. Panic is caused (can be recovered), defer functions are called.
 	Panic(args ...interface{})
+
+	// Panicf logs a formatted message on log level PANIC. Panic is caused (can be recovered), defer functions are called.
 	Panicf(format string, args ...interface{})
 }
 
+// LoggingParameters is a map, which contains parameters passed to the logging adaptor implementation.
 type LoggingParameters map[string]interface{}
 
-// factory interface, which can be implemented by an adaptor.
+// LoggerFactory is the factory interface, which is to be implemented by an adaptor.
 type LoggerFactory interface {
 	// This method is called in order to get a logger instance.
 	GetLogger(name string) Logger
