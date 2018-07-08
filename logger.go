@@ -121,7 +121,8 @@ type LoggerFactory interface {
 	// SetDefaultLogLevel sets the default log level for all loggers created by this factory.
 	SetDefaultLogLevel(level LogLevel)
 
-	// Get
+	// GetDefaultLogLevel returns the default log level set on LoggerFactory.
+	GetDefaultLogLevel() LogLevel
 }
 
 // LoggerAdaptor pre-implements some functions of Logger
