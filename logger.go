@@ -24,6 +24,9 @@ var (
 
 	// A default Writer used for log output, usually log implementations use own one.
 	Writer io.Writer = os.Stderr
+
+	// all log levels as array
+	AllLevels = []LogLevel{LevelTrace, LevelDebug, LevelInfo, LevelWarn, LevelError, LevelFatal, LevelPanic}
 )
 
 // Logger interface
@@ -72,6 +75,9 @@ type LoggerFactory interface {
 	// It's up to a logger adaptor implementation to validate the parameters and return appropriate error,
 	// or nil, if no error was occurred.
 	SetLoggingParameters(params LoggingParameters) error
+
+	// Sets default log level for all loggers created by this factory.
+	SetDefaultLogLevel(level LogLevel)
 }
 
 type LoggerAdaptor struct {
@@ -142,4 +148,25 @@ func GetLogger(name string) Logger {
 // get logger factory
 func GetLoggerFactory() LoggerFactory {
 	return theLoggerFactory
+}
+
+// Stringify LogLevel
+func (l LogLevel) String() string {
+	switch l {
+	case LevelTrace:
+		return "TRACE"
+	case LevelDebug:
+		return "DEBUG"
+	case LevelInfo:
+		return "INFO"
+	case LevelWarn:
+		return "WARN"
+	case LevelError:
+		return "ERROR"
+	case LevelFatal:
+		return "FATAL"
+	case LevelPanic:
+		return "PANIC"
+	}
+	panic("no match for log level")
 }
