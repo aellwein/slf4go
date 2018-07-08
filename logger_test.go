@@ -102,6 +102,10 @@ func (m *mockLoggerFactory) SetDefaultLogLevel(level LogLevel) {
 	m.defaultLogLevel = level
 }
 
+func (m *mockLoggerFactory) GetDefaultLogLevel() LogLevel {
+	return m.defaultLogLevel
+}
+
 func (m *mockLoggerFactory) SetLoggingParameters(params LoggingParameters) error {
 	if _, ok := params["test"]; ok {
 		return errors.New("provoked error")
