@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// Loglevel as used by slf4go
 type LogLevel int
 
 // log levels defined by slf4go
@@ -22,10 +23,10 @@ var (
 	// the one and only global log factory per application, must be first set using SetLoggerFactory() method.
 	theLoggerFactory LoggerFactory
 
-	// A default Writer used for log output, usually log implementations use own one.
+	// Writer is a default Writer used for log output, usually log implementations use own one.
 	Writer io.Writer = os.Stderr
 
-	// all log levels as array
+	// AllLevels contain all log levels as array
 	AllLevels = []LogLevel{LevelTrace, LevelDebug, LevelInfo, LevelWarn, LevelError, LevelFatal, LevelPanic}
 )
 
@@ -80,6 +81,7 @@ type LoggerFactory interface {
 	SetDefaultLogLevel(level LogLevel)
 }
 
+// LoggerAdaptor pre-implements some functions of Logger
 type LoggerAdaptor struct {
 	name  string
 	level LogLevel
