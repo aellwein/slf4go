@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Loglevel as used by slf4go
+// LogLevel as used by slf4go
 type LogLevel int
 
 // log levels defined by slf4go
@@ -118,8 +118,10 @@ type LoggerFactory interface {
 	// or nil, if no error was occurred.
 	SetLoggingParameters(params LoggingParameters) error
 
-	// Sets default log level for all loggers created by this factory.
+	// SetDefaultLogLevel sets the default log level for all loggers created by this factory.
 	SetDefaultLogLevel(level LogLevel)
+
+	// Get
 }
 
 // LoggerAdaptor pre-implements some functions of Logger
@@ -128,51 +130,62 @@ type LoggerAdaptor struct {
 	level LogLevel
 }
 
+// SetName sets the name of the logger
 func (a *LoggerAdaptor) SetName(name string) {
 	a.name = name
 }
 
+// GetName returns the name of the logger
 func (a *LoggerAdaptor) GetName() string {
 	return a.name
 }
 
+// GetLevel returns the log level set on logger
 func (a *LoggerAdaptor) GetLevel() LogLevel {
 	return a.level
 }
 
+// SetLevel sets the log level for the logger
 func (a *LoggerAdaptor) SetLevel(l LogLevel) {
 	a.level = l
 }
 
+// IsTraceEnabled returns true, if level TRACE is enabled.
 func (a *LoggerAdaptor) IsTraceEnabled() bool {
 	return a.level <= LevelTrace
 }
 
+// IsDebugEnabled returns true, if level DEBUG is enabled.
 func (a *LoggerAdaptor) IsDebugEnabled() bool {
 	return a.level <= LevelDebug
 }
 
+// IsInfoEnabled returns true, if level INFO is enabled.
 func (a *LoggerAdaptor) IsInfoEnabled() bool {
 	return a.level <= LevelInfo
 }
 
+// IsWarnEnabled returns true, if level WARN is enabled.
 func (a *LoggerAdaptor) IsWarnEnabled() bool {
 	return a.level <= LevelWarn
 }
 
+// IsErrorEnabled returns true, if level ERROR is enabled.
 func (a *LoggerAdaptor) IsErrorEnabled() bool {
 	return a.level <= LevelError
 }
 
+// IsFatalEnabled returns true, if level FATAL is enabled.
 func (a *LoggerAdaptor) IsFatalEnabled() bool {
 	return a.level <= LevelFatal
 }
 
+// IsPanicEnabled returns true, if level PANIC is enabled.
 func (a *LoggerAdaptor) IsPanicEnabled() bool {
 	return a.level <= LevelPanic
 }
 
-// The LoggerFactory is the interface meant to be provided by slf4go implementors.
+// SetLoggerFactory set the global LoggerFactory provided by the logging adaptor.
 func SetLoggerFactory(factory LoggerFactory) {
 	if factory == nil {
 		panic("LoggerFactory can't be nil")
@@ -180,7 +193,7 @@ func SetLoggerFactory(factory LoggerFactory) {
 	theLoggerFactory = factory
 }
 
-// get logger from our logger factory. It will panic, if no logger factory is set yet.
+// GetLogger creates a named logger instance. It will panic, if no logger factory is set yet.
 func GetLogger(name string) Logger {
 	if theLoggerFactory == nil {
 		panic("LoggerFactory was not set! Please ensure you use SetLoggerFactory() before you get a logger instance")
@@ -188,7 +201,7 @@ func GetLogger(name string) Logger {
 	return theLoggerFactory.GetLogger(name)
 }
 
-// get logger factory
+// GetLoggerFactory gets the global LoggerFactory
 func GetLoggerFactory() LoggerFactory {
 	return theLoggerFactory
 }
