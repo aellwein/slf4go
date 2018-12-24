@@ -3,9 +3,10 @@ package slf4go
 import (
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/smartystreets/assertions"
 	. "github.com/smartystreets/goconvey/convey"
-	"testing"
 )
 
 func TestPanicIsCausedWhenCallingGetLoggerWithoutSetLoggerFactory(t *testing.T) {
