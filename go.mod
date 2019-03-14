@@ -1,7 +1,7 @@
 module github.com/aellwein/slf4go
 
 require (
-	github.com/jtolds/gls v4.2.1+incompatible // indirect
-	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d
-	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c
+	github.com/gopherjs/gopherjs v0.0.0-20190309154008-847fc94819f9 // indirect
+	github.com/smartystreets/assertions v0.0.0-20190215210624-980c5ac6f3ac
+	github.com/smartystreets/goconvey v0.0.0-20190306220146-200a235640ff
 )
