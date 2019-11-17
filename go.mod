@@ -5,3 +5,5 @@ require (
 	github.com/smartystreets/assertions v0.0.0-20190215210624-980c5ac6f3ac
 	github.com/smartystreets/goconvey v0.0.0-20190306220146-200a235640ff
 )
+
+go 1.13
